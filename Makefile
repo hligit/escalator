@@ -5,6 +5,7 @@ TARGET=escalator
 GOCMDOPTS?=
 SRC_DIRS=pkg cmd
 SOURCES=$(shell for dir in $(SRC_DIRS); do if [ -d $$dir ]; then find $$dir -type f -iname '*.go'; fi; done)
+ARCH=$(if $(TARGETPLATFORM),$(lastword $(subst /, ,$(TARGETPLATFORM))),amd64)
 
 $(TARGET): $(SOURCES)
 	go build $(GOCMDOPTS) -o $(TARGET) cmd/main.go
@@ -18,7 +19,7 @@ test-vet:
 	go vet ./...
 
 docker: Dockerfile
-	docker build -t atlassian/escalator .
+	docker buildx build -t atlassian/escalator --platform linux/$(ARCH) .
 
 clean:
 	rm -f $(TARGET)
